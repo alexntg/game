@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Keybinds</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Configure Keybinds</h1>
+
+    <form id="keybindsForm">
+        <div>
+            <label for="moveUp">Move Up (default: W):</label>
+            <input type="text" id="moveUp" name="moveUp" value="W">
+        </div>
+        <div>
+            <label for="moveLeft">Move Left (default: A):</label>
+            <input type="text" id="moveLeft" name="moveLeft" value="A">
+        </div>
+        <div>
+            <label for="moveDown">Move Down (default: S):</label>
+            <input type="text" id="moveDown" name="moveDown" value="S">
+        </div>
+        <div>
+            <label for="moveRight">Move Right (default: D):</label>
+            <input type="text" id="moveRight" name="moveRight" value="D">
+        </div>
+        <div>
+            <label for="attack">Attack (default: Left Click):</label>
+            <input type="text" id="attack" name="attack" value="Left Click">
+        </div>
+        <div>
+            <label for="dodge">Dodge (default: Right Click):</label>
+            <input type="text" id="dodge" name="dodge" value="Right Click">
+        </div>
+        
+        <button type="button" onclick="saveKeybinds()">Save Keybinds</button>
+    </form>
+
+    <a href="/">Back to Menu</a>
+
+    <script>
+        // Load saved keybinds from localStorage
+        window.onload = function() {
+            const savedKeybinds = JSON.parse(localStorage.getItem('keybinds')) || {};
+            document.getElementById('moveUp').value = savedKeybinds.moveUp || 'W';
+            document.getElementById('moveLeft').value = savedKeybinds.moveLeft || 'A';
+            document.getElementById('moveDown').value = savedKeybinds.moveDown || 'S';
+            document.getElementById('moveRight').value = savedKeybinds.moveRight || 'D';
+            document.getElementById('attack').value = savedKeybinds.attack || 'Left Click';
+            document.getElementById('dodge').value = savedKeybinds.dodge || 'Right Click';
+        };
+
+        function saveKeybinds() {
+            const keybinds = {
+                moveUp: document.getElementById('moveUp').value,
+                moveLeft: document.getElementById('moveLeft').value,
+                moveDown: document.getElementById('moveDown').value,
+                moveRight: document.getElementById('moveRight').value,
+                attack: document.getElementById('attack').value,
+                dodge: document.getElementById('dodge').value
+            };
+
+            localStorage.setItem('keybinds', JSON.stringify(keybinds));
+            alert('Keybinds saved successfully!');
+        }
+    </script>
+</body>
+</html>

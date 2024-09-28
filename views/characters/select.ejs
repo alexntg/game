@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Character</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Select Your Character</h1>
+    <ul>
+        <% characters.forEach(character => { %>
+            <li>
+                <strong>Name:</strong> <%= character.name %> |
+                <strong>Level:</strong> <%= character.characterLevel %> |
+                <strong>HP:</strong> <%= character.Hp %>
+                <button onclick="selectCharacter(<%= character.id %>)">Select</button>
+            </li>
+        <% }) %>
+    </ul>
+
+    <script>
+        function selectCharacter(characterId) {
+            fetch('/game/select', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ characterId: characterId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Character selected: " + data.character.name);
+                window.location.href = '/game'; // Redirect to the game screen
+            })
+            .catch(error => {
+                console.error('Error selecting character:', error);
+            });
+        }
+    </script>
+</body>
+</html>

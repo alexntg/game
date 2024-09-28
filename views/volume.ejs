@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjust Volume</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Adjust Volume</h1>
+
+    <form id="volumeForm">
+        <div>
+            <label for="masterVolume">Master Volume:</label>
+            <input type="range" id="masterVolume" name="masterVolume" min="0" max="100" value="100" oninput="updateVolumeLabel('masterVolumeLabel', this.value)">
+            <span id="masterVolumeLabel">100</span>%
+        </div>
+        <div>
+            <label for="musicVolume">Music Volume:</label>
+            <input type="range" id="musicVolume" name="musicVolume" min="0" max="100" value="100" oninput="updateVolumeLabel('musicVolumeLabel', this.value)">
+            <span id="musicVolumeLabel">100</span>%
+        </div>
+        <div>
+            <label for="fxVolume">FX Volume:</label>
+            <input type="range" id="fxVolume" name="fxVolume" min="0" max="100" value="100" oninput="updateVolumeLabel('fxVolumeLabel', this.value)">
+            <span id="fxVolumeLabel">100</span>%
+        </div>
+
+        <button type="button" onclick="saveVolumeSettings()">Save Volume Settings</button>
+    </form>
+
+    <a href="/">Back to Menu</a>
+
+    <script>
+        // Load saved volume settings from localStorage
+        window.onload = function() {
+            const savedVolumeSettings = JSON.parse(localStorage.getItem('volumeSettings')) || {};
+            document.getElementById('masterVolume').value = savedVolumeSettings.masterVolume || 100;
+            document.getElementById('musicVolume').value = savedVolumeSettings.musicVolume || 100;
+            document.getElementById('fxVolume').value = savedVolumeSettings.fxVolume || 100;
+
+            updateVolumeLabel('masterVolumeLabel', document.getElementById('masterVolume').value);
+            updateVolumeLabel('musicVolumeLabel', document.getElementById('musicVolume').value);
+            updateVolumeLabel('fxVolumeLabel', document.getElementById('fxVolume').value);
+        };
+
+        function updateVolumeLabel(labelId, value) {
+            document.getElementById(labelId).innerText = value;
+        }
+
+        function saveVolumeSettings() {
+            const volumeSettings = {
+                masterVolume: document.getElementById('masterVolume').value,
+                musicVolume: document.getElementById('musicVolume').value,
+                fxVolume: document.getElementById('fxVolume').value
+            };
+
+            localStorage.setItem('volumeSettings', JSON.stringify(volumeSettings));
+            alert('Volume settings saved successfully!');
+        }
+    </script>
+</body>
+</html>

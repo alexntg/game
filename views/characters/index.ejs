@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Characters List</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Character List</h1>
+    <ul>
+        <% characters.forEach(character => { %>
+            <li>
+                <strong>Name:</strong> <%= character.name %> |
+                <strong>Level:</strong> <%= character.characterLevel %> |
+                <strong>HP:</strong> <%= character.Hp %>
+                <a href="/characters/edit/<%= character.id %>">Edit</a>
+                <a href="/characters/delete/<%= character.id %>">Delete</a>
+            </li>
+        <% }) %>
+    </ul>
+    <a href="/characters/create">Create New Character</a>
+</body>
+</html>

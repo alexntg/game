@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Menu</title>
+	<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+	<ul>
+		<li><a href="javascript:void(0)" onclick="saveAndExit()">Exit</a></li>
+		<li><a href="/keybinds">Keybinds</a></li>
+		<li><a href="/volume">Volume</a></li>
+		<li><a href="/idk">IDK</a></li>
+	</ul>
+	<ul>
+		<li><a href="/characters">Select Character</a></li>
+		<li><a href="javascript:void(0)" onclick="openEquipmentModal()">Select Equipment</a></li>
+	</ul>
+
+	<!-- Modal for selecting equipment -->
+	<div id="equipment-modal" class="modal hidden">
+		<div class="modal-content">
+			<span class="close" onclick="closeEquipmentModal()">&times;</span>
+			<h2>Select Equipment</h2>
+			<ul id="equipment-list">
+				<!-- Equipment options will be loaded here dynamically -->
+			</ul>
+		</div>
+	</div>
+
+	<!-- Map Section -->
+	<div id="game-map" style="background-color: lightgreen; width: 100%; height: 500px;">
+		<!-- Game Map content goes here -->
+	</div>
+
+	<script>
+		// Save character and game state to localStorage
+		function saveAndExit() {
+			const character = JSON.parse(localStorage.getItem('character')) || {};
+			const gameState = JSON.parse(localStorage.getItem('gameState')) || {};
+
+			// Simulate saving to localStorage (replace with real game data)
+			localStorage.setItem('character', JSON.stringify(character));
+			localStorage.setItem('gameState', JSON.stringify(gameState));
+
+			alert("Game state saved! Exiting...");
+			window.location.href = '/'; // Redirect to the homepage or exit action
+		}
+
+		// Open the equipment selection modal
+		function openEquipmentModal() {
+			document.getElementById('equipment-modal').classList.remove('hidden');
+			// Load equipment options dynamically (could be from an API or predefined list)
+			document.getElementById('equipment-list').innerHTML = `
+				<li><a href="#" onclick="selectEquipment('Sword')">Sword</a></li>
+				<li><a href="#" onclick="selectEquipment('Shield')">Shield</a></li>
+				<li><a href="#" onclick="selectEquipment('Bow')">Bow</a></li>
+			`;
+		}
+
+		// Close the equipment selection modal
+		function closeEquipmentModal() {
+			document.getElementById('equipment-modal').classList.add('hidden');
+		}
+
+		// Simulate equipment selection
+		function selectEquipment(equipment) {
+			alert('Equipment selected: ' + equipment);
+			closeEquipmentModal();
+		}
+	</script>
+
+	<!-- Modal CSS -->
+	<style>
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 1;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgb(0,0,0);
+			background-color: rgba(0,0,0,0.4);
+		}
+		.modal-content {
+			background-color: #fefefe;
+			margin: 15% auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 80%;
+		}
+		.close {
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+		.close:hover,
+		.close:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		.hidden {
+			display: none;
+		}
+	</style>
+
+</body>
+</html>

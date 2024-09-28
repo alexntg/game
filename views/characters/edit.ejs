@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Character</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Edit Character: <%= character.name %></h1>
+    <form action="/characters/update/<%= character.id %>" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="<%= character.name %>" required>
+
+        <label for="level">Level:</label>
+        <input type="number" id="level" name="characterLevel" value="<%= character.characterLevel %>" required>
+
+        <label for="hp">HP:</label>
+        <input type="number" id="hp" name="Hp" value="<%= character.Hp %>" required>
+
+        <label for="damage">Damage:</label>
+        <input type="number" id="damage" name="Damage" value="<%= character.Damage %>" required>
+
+        <label for="stamina">Stamina:</label>
+        <input type="number" id="stamina" name="Stamina" value="<%= character.Stamina %>" required>
+
+        <input type="submit" value="Update">
+    </form>
+    <a href="/characters">Back to Character List</a>
+</body>
+</html>
