@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Character</title>
-    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <h1>Edit Character: <%= character.name %></h1>
-    <form action="/characters/update/<%= character.id %>" method="POST">
+    <form action="/characters/<%= character.id %>/update" method="POST">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" value="<%= character.name %>" required>
 

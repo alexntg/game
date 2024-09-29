@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game - <%= character.name %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            margin: 0;
+            background-color: #000; /* Fondo oscuro para mejor contraste */
+            display: flex; /* Utiliza flexbox para centrar el contenedor */
+            justify-content: center; /* Centra horizontalmente */
+            align-items: center; /* Centra verticalmente */
+            height: 100vh; /* Altura completa de la ventana */
+
+        }
+        #game-container {
+            position: relative;
+            width: 100vh; /* Usar 100% del ancho de la ventana */
+            height: 100vh; /* Usar 100% de la altura de la ventana */
+            overflow: hidden; /* Oculta el contenido que sobresale del contenedor */
+        }
+        #map {
+            position: absolute;
+
+            height: 100%;
+            width: 100%;
+            background-image: url('/images/house.jpg'); /* Imagen de fondo del mapa */
+            background-size: cover; /* Asegura que la imagen cubra el mapa */
+
+        }
+        #character {
+            border: none;
+            background-color: rgba(0,0,0,0);
+            position: absolute;
+            width: 50px; /* Tamaño del personaje */
+            height: 50px; /* Tamaño del personaje */
+            background-image: url('/images/caveman.png'); /* Imagen inicial del personaje */
+            background-size: cover;
+            top: 50%; /* Centra verticalmente el personaje */
+            left: 50%; /* Centra horizontalmente el personaje */
+            transform: translate(-50%, -50%); /* Ajuste para centrar exactamente */
+            z-index: 1; /* Asegura que el personaje esté en el frente */
+        }
+
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="map"></div>
+        <div id="character"></div>
+    </div>
+
+    <script>
+        let mapX = 0; // Posición inicial del mapa
+        let mapY = 0; // Posición inicial del mapa
+        const moveDistance = 10; // Distancia a mover el mapa en cada acción
+        const mapElement = document.getElementById('map');
+        const containerWidth = window.innerWidth; // Ancho del contenedor
+        const containerHeight = window.innerHeight; // Altura del contenedor
+        const mapWidth = 2000; // Ancho del mapa
+        const mapHeight = 2000; // Altura del mapa
+
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'w':
+                    mapY -= moveDistance; // Mover el mapa hacia arriba
+                    break;
+                case 's':
+                    mapY += moveDistance; // Mover el mapa hacia abajo
+                    break;
+                case 'a':
+                    mapX -= moveDistance; // Mover el mapa hacia la izquierda
+                    break;
+                case 'd':
+                    mapX += moveDistance; // Mover el mapa hacia la derecha
+                    break;
+                default:
+                    return; // No hacer nada si la tecla no es W, A, S o D
+            }
+
+            // Mover el mapa
+            mapElement.style.transform = `translate(${mapX}px, ${mapY}px)`;
+
+            // Verificar si el mapa está fuera de los límites del contenedor
+            if (mapX > 0 || mapX < -(mapWidth - containerWidth) || mapY > 0 || mapY < -(mapHeight - containerHeight)) {
+                mapElement.classList.add('hidden'); // Oculta el mapa si está fuera de los límites
+            } else {
+                mapElement.classList.remove('hidden'); // Muestra el mapa si está dentro de los límites
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (event.button === 0) { // Click izquierdo
+                // Cambiar la imagen del personaje a un sprite de ataque
+                document.getElementById('character').style.backgroundImage = 'url("/images/basicattack1.png")';
+                
+                // Lógica para reiniciar la imagen después de un tiempo, si es necesario
+                setTimeout(() => {
+                    document.getElementById('character').style.backgroundImage = 'url("/images/caveman.png")';
+                }, 300); // Cambia de vuelta después de 300ms (ajusta según sea necesario)
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,47 +1,93 @@
-const characterModel = require('../models/characterModel');
 const gameModel = require('../models/gameModel');
+const characterModel = require('../models/characterModel');
 
-exports.select = (req, res) => {
-    const characters = characterModel.getAllCharacters();
-    res.render('characters/select', { characters });
+// Renderiza la vista principal del juego, mostrando el personaje seleccionado
+exports.view = (req, res) => {
+    // Retrieve the selected character from the session
+    const selectedCharacter = req.session.selectedCharacter;
+    
+    // If no character is selected, redirect to the home page
+    if (!selectedCharacter) {
+        console.log("No character selected, redirecting to home.");
+        return res.redirect('/'); // Redirect if no character is selected
+    }
+
+    // Render the game view with the selected character
+    res.render('game/game', { character: selectedCharacter, title: `Game - ${selectedCharacter.name}` });
 };
+
+
+// Renderiza la vista de la página de inicio
+exports.home = (req, res) => {
+    res.render('index', { title: 'Landing page' });
+};
+
+// Renderiza la vista para seleccionar un personaje
+exports.select = (req, res) => {
+    characterModel.getAllCharacters((err, characters) => {
+        if (err) return handleError(err, res);
+
+        if (!characters || characters.length === 0) {
+            return res.render('error', { message: 'No characters available', title: 'Error' });
+        }
+
+        // Solo debe renderizarse una vez
+        res.render('characters/select', { characters, title: 'Select Character' });
+    });
+};
+
 
 exports.chooseCharacter = (req, res) => {
-    const gameState = gameModel.getGameState();
-    gameState.characterId = parseInt(req.body.characterId);
-    gameModel.saveGameState(gameState);
-    res.redirect('/game');
+    const characterId = req.body.characterId;
+
+    // Find the character using the provided ID
+    characterModel.findCharacterById(characterId, (err, character) => {
+        if (err) {
+            console.error("Error finding character:", err);
+            return res.status(500).json({ error: 'Character not found' });
+        }
+
+        // If character is not found
+        if (!character) {
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        // Store the character in the session
+        req.session.selectedCharacter = character;
+        console.log("Selected character stored in session:", req.session.selectedCharacter);
+
+        // Send a successful response
+        res.status(200).json({ character });
+    });
 };
 
-exports.view = (req, res) => {
-    const gameState = gameModel.getGameState();
-    const character = characterModel.findCharacterById(gameState.characterId);
-    res.render('game', { character });
-};
 
+
+// Actualiza el nivel del personaje seleccionado en función de su experiencia
 exports.updateLevel = (req, res) => {
     const gameState = gameModel.getGameState();
     const character = characterModel.findCharacterById(gameState.characterId);
 
-    // Check if currentEXP is greater than or equal to characterEXP
-    if (character.currentEXP >= character.characterEXP) {
-        // Increase characterLevel
-        character.characterLevel += 1;
+    if (!character) {
+        return res.status(404).json({ message: 'Character not found' });
+    }
 
-        // Increase character attributes
-        character.Hp = Math.floor(character.Hp * 1.05);
+    // Comprueba si el personaje ha acumulado suficiente experiencia para subir de nivel
+    if (character.currentEXP >= character.characterEXP) {
+        character.characterLevel += 1; // Aumenta el nivel del personaje
+        character.Hp = Math.floor(character.Hp * 1.05); // Mejora los atributos
         character.Damage += 3;
         character.Stamina += 2;
 
-        // Update characterEXP and currentEXP
-        character.characterEXP = Math.floor(character.characterEXP * 1.2); // Increase characterEXP by 20%
-        character.currentEXP = 0; //Reset current exp
+        // Ajusta la experiencia para el siguiente nivel y reinicia la experiencia actual
+        character.characterEXP = Math.floor(character.characterEXP * 1.2);
+        character.currentEXP = 0;
+
+        // Guarda el estado actualizado del personaje
+        characterModel.saveCharacter(character);
     }
 
-    // Save the updated character state
-    characterModel.saveCharacter(character);
-
-    // Respond with the updated character level and attributes
+    // Devuelve el nivel y atributos actualizados del personaje
     res.json({
         characterLevel: character.characterLevel,
         Hp: character.Hp,
@@ -51,71 +97,59 @@ exports.updateLevel = (req, res) => {
     });
 };
 
+// controllers/gameController.js
+
 exports.performAction = (req, res) => {
+    const character = req.session.selectedCharacter; // Usamos el personaje de la sesión
+
+    if (!character) {
+        return res.status(404).json({ message: 'Character not found' });
+    }
+
+    // Lógica para realizar la acción (atacar, moverse, etc.)
+    const action = req.body.action; // Acción enviada desde el cliente
+
+    // Actualiza la posición del personaje según la acción
+    switch (action) {
+        case 'moveUp':
+            character.y -= 1; // Mover hacia arriba
+            break;
+        case 'moveDown':
+            character.y += 1; // Mover hacia abajo
+            break;
+        case 'moveLeft':
+            character.x -= 1; // Mover hacia la izquierda
+            break;
+        case 'moveRight':
+            character.x += 1; // Mover hacia la derecha
+            break;
+        default:
+            return res.status(400).json({ message: 'Invalid action' });
+    }
+
+    // Responder con la nueva posición del personaje
+    res.json({ character });
+};
+
+
+// Inicia la regeneración de stamina después de una acción
+exports.regenerateStamina = (req, res) => {
     const gameState = gameModel.getGameState();
     const character = characterModel.findCharacterById(gameState.characterId);
 
-    const actionCost = 1;
-
-    if (character.Stamina >= actionCost) {
-        character.Stamina -= actionCost; // Reduce stamina
-
-        // Handle action logic here (e.g., hitting an enemy)
-
-        // Save the updated character state
-        characterModel.saveCharacter(character);
-
-        res.json({
-            message: 'Action performed successfully',
-            Stamina: character.Stamina
-        });
-    } else {
-        res.status(400).json({ message: 'Not enough stamina!' });
+    if (!character) {
+        return res.status(404).json({ message: 'Character not found' });
     }
+
+    // Aumenta la stamina hasta su valor máximo
+    const regenerationRate = 2;
+    character.Stamina = Math.min(character.Stamina + regenerationRate, character.maxStamina);
+
+    // Guarda el estado actualizado del personaje
+    characterModel.saveCharacter(character);
+
+    res.json({
+        message: 'Stamina regenerated',
+        Stamina: character.Stamina
+    });
 };
-
-let actionCooldown = false;
-
-function performAction() {
-    if (actionCooldown) return;
-
-    actionCooldown = true;
-
-    // Perform the action (e.g., hitting)
-    fetch('/perform-action', { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            // Update the UI with new stamina
-            updateStaminaUI(data.Stamina);
-
-            // Start stamina regeneration after action
-            startStaminaRegeneration();
-        })
-        .finally(() => {
-            actionCooldown = false;
-        });
-}
-
-function startStaminaRegeneration() {
-    setTimeout(() => {
-        regenerateStamina();
-    }, 1000); // Wait 1 second before starting regeneration
-}
-
-function regenerateStamina() {
-    fetch('/regenerate-stamina', { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            // Update the UI with new stamina
-            updateStaminaUI(data.Stamina);
-            if (data.Stamina < character.maxStamina) {
-                // Continue regenerating if stamina is still below max
-                regenerateStamina();
-            }
-        });
-}
-
-function updateStaminaUI(stamina) {
-    const staminaBar = document.getElementById('stamina-bar');
-    staminaBar.style.width = (stamina / character.maxStamina) * 100 + '%'; // Assuming maxStamina is defined
-}

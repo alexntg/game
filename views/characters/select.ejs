@@ -27,15 +27,23 @@
                 },
                 body: JSON.stringify({ characterId: characterId }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log("Response data:", data); // Log the response data
                 alert("Character selected: " + data.character.name);
-                window.location.href = '/game'; // Redirect to the game screen
+                window.location.href = '/game'; // Ensure this redirects correctly
             })
             .catch(error => {
                 console.error('Error selecting character:', error);
+                alert("There was an error selecting the character.");
             });
         }
     </script>
+
 </body>
 </html>
