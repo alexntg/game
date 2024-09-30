@@ -12,7 +12,6 @@
             justify-content: center; /* Centra horizontalmente */
             align-items: center; /* Centra verticalmente */
             height: 100vh; /* Altura completa de la ventana */
-
         }
         #game-container {
             position: relative;
@@ -22,12 +21,10 @@
         }
         #map {
             position: absolute;
-
             height: 100%;
             width: 100%;
             background-image: url('/images/house.jpg'); /* Imagen de fondo del mapa */
             background-size: cover; /* Asegura que la imagen cubra el mapa */
-
         }
         #character {
             border: none;
@@ -42,7 +39,6 @@
             transform: translate(-50%, -50%); /* Ajuste para centrar exactamente */
             z-index: 1; /* Asegura que el personaje esté en el frente */
         }
-
     </style>
 </head>
 <body>
@@ -56,23 +52,29 @@
         let mapY = 0; // Posición inicial del mapa
         const moveDistance = 10; // Distancia a mover el mapa en cada acción
         const mapElement = document.getElementById('map');
-        const containerWidth = window.innerWidth; // Ancho del contenedor
-        const containerHeight = window.innerHeight; // Altura del contenedor
-        const mapWidth = 2000; // Ancho del mapa
-        const mapHeight = 2000; // Altura del mapa
+
+        // Load saved keybinds from localStorage
+        const savedKeybinds = JSON.parse(localStorage.getItem('keybinds')) || {};
+        const moveUp = savedKeybinds.moveUp || 'w';
+        const moveDown = savedKeybinds.moveDown || 's';
+        const moveLeft = savedKeybinds.moveLeft || 'a';
+        const moveRight = savedKeybinds.moveRight || 'd';
+
+        // Character attack key is assumed to be the left click by default
+        const attackKey = savedKeybinds.attack || 'Left Click';
 
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
-                case 'w':
+                case moveUp:
                     mapY -= moveDistance; // Mover el mapa hacia arriba
                     break;
-                case 's':
+                case moveDown:
                     mapY += moveDistance; // Mover el mapa hacia abajo
                     break;
-                case 'a':
+                case moveLeft:
                     mapX -= moveDistance; // Mover el mapa hacia la izquierda
                     break;
-                case 'd':
+                case moveRight:
                     mapX += moveDistance; // Mover el mapa hacia la derecha
                     break;
                 default:
@@ -81,13 +83,6 @@
 
             // Mover el mapa
             mapElement.style.transform = `translate(${mapX}px, ${mapY}px)`;
-
-            // Verificar si el mapa está fuera de los límites del contenedor
-            if (mapX > 0 || mapX < -(mapWidth - containerWidth) || mapY > 0 || mapY < -(mapHeight - containerHeight)) {
-                mapElement.classList.add('hidden'); // Oculta el mapa si está fuera de los límites
-            } else {
-                mapElement.classList.remove('hidden'); // Muestra el mapa si está dentro de los límites
-            }
         });
 
         document.addEventListener('click', (event) => {

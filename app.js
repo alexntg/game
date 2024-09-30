@@ -39,6 +39,8 @@ app.post('/characters/store', characterController.store);
 app.post('/characters/:id/update', characterController.update);
 app.post('/characters/:id/delete', characterController.delete);
 
+app.get('/keybinds', characterController.keybinds);
+
 // Game routes
 app.get('/game', gameController.view);
 app.post('/game/select', gameController.chooseCharacter);

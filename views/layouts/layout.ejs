@@ -3,26 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/styles.css">
-    <title>bbb</title> 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Welcome to My Game</title>
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light background for contrast */
+        }
+        .navbar {
+            padding: 0.5rem 1rem; /* Adjust padding for a smaller navbar */
+        }
+        .navbar-brand {
+            width: 50%; /* Brand occupies half the navbar */
+            text-align: center; /* Center the brand text */
+        }
+        .navbar-nav {
+            width: 50%; /* Navigation items occupy half the navbar */
+            display: flex; /* Use flexbox for alignment */
+            justify-content: space-evenly; /* Evenly space the nav items */
+            padding-left: 0; /* Remove default padding for ul */
+        }
+        .navbar-nav .nav-link {
+            padding: 0.5rem; /* Adjust padding for nav links */
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav>
-            <h1>Welcome to My Game!</h1>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/characters">Characters</a></li>
-                <li><a href="/game">Game</a></li>
-            </ul>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">My Game</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto"> <!-- Center align the nav items -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/characters">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/game">Game</a>
+                    </li>
+                </ul>
+            </div>
         </nav>
     </header>
     
-    <main>
+    <main class="container mt-4">
         <%- body %> 
     </main>
-    <footer>
-        <p>&copy; SIUDSAIGB</p>
+
+    <footer class="text-center mt-4">
+        <p>&copy; 2024 My Game. All rights reserved.</p>
     </footer>
+
+    <!-- Bootstrap JS and dependencies (jQuery and Popper.js) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

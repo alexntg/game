@@ -17,6 +17,10 @@ exports.create = (req, res) => {
     res.render('characters/create');
 };
 
+exports.keybinds = (req, res) => {
+    res.render('keybinds');
+};
+
 exports.select = (req, res) => {
     characterModel.getAllCharacters((err, characters) => {
         if (err) return handleError(err, res);
