@@ -7,37 +7,37 @@
     <style>
         body {
             margin: 0;
-            background-color: #000; /* Fondo oscuro para mejor contraste */
-            display: flex; /* Utiliza flexbox para centrar el contenedor */
-            justify-content: center; /* Centra horizontalmente */
-            align-items: center; /* Centra verticalmente */
-            height: 100vh; /* Altura completa de la ventana */
+            background-color: #000; 
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
         }
         #game-container {
             position: relative;
-            width: 100vh; /* Usar 100% del ancho de la ventana */
-            height: 100vh; /* Usar 100% de la altura de la ventana */
-            overflow: hidden; /* Oculta el contenido que sobresale del contenedor */
+            width: 100vh; 
+            height: 100vh; 
+            overflow: hidden; 
         }
         #map {
             position: absolute;
             height: 100%;
             width: 100%;
-            background-image: url('/images/house.jpg'); /* Imagen de fondo del mapa */
-            background-size: cover; /* Asegura que la imagen cubra el mapa */
+            background-image: url('/images/house.jpg');
+            background-size: cover;
         }
         #character {
             border: none;
             background-color: rgba(0,0,0,0);
             position: absolute;
-            width: 50px; /* Tamaño del personaje */
-            height: 50px; /* Tamaño del personaje */
-            background-image: url('/images/caveman.png'); /* Imagen inicial del personaje */
+            width: 50px; 
+            height: 50px; 
+            background-image: url('/images/caveman.png'); 
             background-size: cover;
-            top: 50%; /* Centra verticalmente el personaje */
-            left: 50%; /* Centra horizontalmente el personaje */
-            transform: translate(-50%, -50%); /* Ajuste para centrar exactamente */
-            z-index: 1; /* Asegura que el personaje esté en el frente */
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            z-index: 1;
         }
     </style>
 </head>
@@ -48,52 +48,47 @@
     </div>
 
     <script>
-        let mapX = 0; // Posición inicial del mapa
-        let mapY = 0; // Posición inicial del mapa
-        const moveDistance = 10; // Distancia a mover el mapa en cada acción
+        let mapX = 0; 
+        let mapY = 0; 
+        const moveDistance = 10; 
         const mapElement = document.getElementById('map');
 
-        // Load saved keybinds from localStorage
         const savedKeybinds = JSON.parse(localStorage.getItem('keybinds')) || {};
         const moveUp = savedKeybinds.moveUp || 'w';
         const moveDown = savedKeybinds.moveDown || 's';
         const moveLeft = savedKeybinds.moveLeft || 'a';
         const moveRight = savedKeybinds.moveRight || 'd';
 
-        // Character attack key is assumed to be the left click by default
+        
         const attackKey = savedKeybinds.attack || 'Left Click';
 
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case moveUp:
-                    mapY -= moveDistance; // Mover el mapa hacia arriba
+                    mapY -= moveDistance; 
                     break;
                 case moveDown:
-                    mapY += moveDistance; // Mover el mapa hacia abajo
-                    break;
+                    mapY += moveDistance;
                 case moveLeft:
-                    mapX -= moveDistance; // Mover el mapa hacia la izquierda
+                    mapX -= moveDistance; 
                     break;
                 case moveRight:
-                    mapX += moveDistance; // Mover el mapa hacia la derecha
+                    mapX += moveDistance;
                     break;
                 default:
-                    return; // No hacer nada si la tecla no es W, A, S o D
+                    return;
             }
 
-            // Mover el mapa
             mapElement.style.transform = `translate(${mapX}px, ${mapY}px)`;
         });
 
         document.addEventListener('click', (event) => {
-            if (event.button === 0) { // Click izquierdo
-                // Cambiar la imagen del personaje a un sprite de ataque
+            if (event.button === 0) {
                 document.getElementById('character').style.backgroundImage = 'url("/images/basicattack1.png")';
                 
-                // Lógica para reiniciar la imagen después de un tiempo, si es necesario
                 setTimeout(() => {
                     document.getElementById('character').style.backgroundImage = 'url("/images/caveman.png")';
-                }, 300); // Cambia de vuelta después de 300ms (ajusta según sea necesario)
+                }, 300);
             }
         });
     </script>
