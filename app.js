@@ -2,10 +2,17 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const expressLayouts = require('express-ejs-layouts');
-const session = require('express-session'); 
-const characterController = require('./controllers/characterController');
-const gameController = require('./controllers/gameController'); 
+const session = require('express-session');
+const http = require('http'); // Importar http
+const socketio = require('socket.io'); // Importar socket.io
+
 const app = express();
+const server = http.createServer(app); // Crear servidor HTTP
+const io = socketio(server); // Inicializar socket.io
+
+const characterController = require('./controllers/characterController');
+const gameController = require('./controllers/gameController');
+
 const PORT = process.env.PORT || 3000;
 
 app.use(session({
@@ -24,7 +31,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.get('/', (req, res) => {
     res.render('index', { title: 'Landing Page' });
 });
@@ -41,11 +47,41 @@ app.post('/characters/:id/delete', characterController.delete);
 
 app.get('/keybinds', characterController.keybinds);
 
-// Game routes
 app.get('/game', gameController.view);
 app.post('/game/select', gameController.chooseCharacter);
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+const players = {};
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    // Send existing players to the new player
+    socket.emit('existingPlayers', players);
+
+    // Handle new player
+    socket.on('newPlayer', (player) => {
+        console.log('New player joined:', player);
+        players[socket.id] = player;
+        socket.broadcast.emit('newPlayer', player);
+    });
+
+    // Handle player movement
+    socket.on('move', (data) => {
+        if (players[socket.id]) {
+            players[socket.id].x = data.x;
+            players[socket.id].y = data.y;
+            socket.broadcast.emit('movePlayer', { id: socket.id, ...data });
+        }
+    });
+
+    // Handle player disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+        delete players[socket.id];
+        io.emit('removePlayer', { id: socket.id });
+    });
+});
+
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

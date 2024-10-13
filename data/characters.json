@@ -32,5 +32,13 @@
     "Hp": 100,
     "Damage": 10,
     "Stamina": 10
+  },
+  {
+    "id": 6,
+    "name": "Manolo",
+    "characterLevel": 1,
+    "Hp": 100,
+    "Damage": 10,
+    "Stamina": 10
   }
 ]
