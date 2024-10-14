@@ -1,9 +1,9 @@
 // controllers/characterController.js
 const characterModel = require('../models/characterModel');
 
-// Define the handleError function
+// Función para manejar errores
 const handleError = (err, res) => {
-    console.error(err); // Log the error to the console
+    console.error(err); // Registra el error en la consola
     res.status(500).render('error', { message: 'An error occurred', title: 'Error' });
 };
 
@@ -41,14 +41,13 @@ exports.select = async (req, res) => {
 exports.store = async (req, res) => {
     try {
         const newCharacter = {
-            name: req.body.name.replace(/<[^>]*>?/g, ''), // Sanitize user input
-            characterLevel: 1,
-            Hp: 100,
-            Damage: 10,
-            Stamina: 10,
+            name: req.body.name.replace(/<[^>]*>?/g, ''), // Sanitiza la entrada del usuario
+            class: req.body.class.replace(/<[^>]*>?/g, ''), // Sanitiza la clase
+            level: req.body.level || 1, // Asigna nivel 1 si no se proporciona otro
+            user: req.session.userId, // Se asume que el ID del usuario está guardado en la sesión
         };
 
-        await characterModel.createCharacter(newCharacter); // Save the new character to MongoDB
+        await characterModel.createCharacter(newCharacter); // Guarda el nuevo personaje en MongoDB
         res.redirect('/characters');
     } catch (err) {
         handleError(err, res);
@@ -61,12 +60,12 @@ exports.edit = async (req, res) => {
     try {
         const character = await characterModel.findCharacterById(characterId);
         
-        // If the character is not found, return a 404 error
+        // Si no se encuentra el personaje, retorna un error 404
         if (!character) {
             return res.status(404).render('error', { message: 'Character not found', title: 'Error' });
         }
 
-        // Correctly render the edit page with the character's data
+        // Renderiza correctamente la página de edición con los datos del personaje
         res.render('characters/edit', { character });
     } catch (err) {
         console.error("Error finding character:", err);
@@ -84,9 +83,12 @@ exports.update = async (req, res) => {
             return res.status(404).render('error', { message: 'Character not found' });
         }
 
-        // Update character properties
-        Object.assign(character, req.body);
-        await characterModel.saveCharacter(character); // Save the updated character
+        // Actualiza las propiedades del personaje
+        character.name = req.body.name.replace(/<[^>]*>?/g, ''); // Sanitiza la entrada
+        character.class = req.body.class.replace(/<[^>]*>?/g, ''); // Sanitiza la clase
+        character.level = req.body.level || character.level; // Solo actualiza si se proporciona un nuevo nivel
+
+        await characterModel.saveCharacter(character); // Guarda el personaje actualizado
         res.redirect('/characters');
     } catch (err) {
         handleError(err, res);
@@ -97,8 +99,8 @@ exports.delete = async (req, res) => {
     const characterId = req.params.id;
 
     try {
-        await characterModel.deleteCharacter(characterId); // Delete character from MongoDB
-        res.redirect('/characters'); // Redirect after deletion
+        await characterModel.deleteCharacter(characterId); // Elimina el personaje de MongoDB
+        res.redirect('/characters'); // Redirige después de la eliminación
     } catch (err) {
         handleError(err, res);
     }

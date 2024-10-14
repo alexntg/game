@@ -59,17 +59,8 @@ app.get('/login', (req, res) => {
     res.render('login', { title: 'Login', error: null });
 });
 
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    // Simular autenticación básica
-    if (username === 'chosenUndead' && password === 'bonfire') {
-        req.session.isAuthenticated = true;
-        req.session.username = username;
-        res.redirect('/');
-    } else {
-        res.render('login', { title: 'Login', error: 'Invalid credentials' });
-    }
-});
+app.post('/login', authController.login);
+
 
 app.post('/logout', (req, res) => {
     req.session.destroy(() => {
@@ -88,6 +79,38 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', authController.register); // Llama al controlador de registro
+
+app.get('/check-users', async (req, res) => {
+    try {
+        const users = await User.find(); // Encuentra todos los usuarios
+        if (users.length > 0) {
+            res.send(users); // Envía los usuarios como respuesta
+        } else {
+            res.send('No se encontraron usuarios en la base de datos.');
+        }
+    } catch (error) {
+        console.error('Error consultando usuarios:', error);
+        res.status(500).send('Error al consultar la base de datos.');
+    }
+});
+
+const Character = require('./models/characterModel'); // Asegúrate de que la ruta sea correcta
+
+// Ruta para consultar todos los personajes
+app.get('/check-characters', async (req, res) => {
+    try {
+        const characters = await Character.find().populate('user'); // Encuentra todos los personajes y sus usuarios relacionados
+        if (characters.length > 0) {
+            res.send(characters); // Envía los personajes como respuesta
+        } else {
+            res.send('No se encontraron personajes en la base de datos.');
+        }
+    } catch (error) {
+        console.error('Error consultando personajes:', error);
+        res.status(500).send('Error al consultar la base de datos.');
+    }
+});
+
 
 // Rutas de personajes
 app.get('/characters/select', characterController.select);

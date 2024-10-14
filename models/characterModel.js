@@ -1,45 +1,50 @@
-const fs = require('fs');
-const path = require('path');
+// models/characterModel.js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const dataFilePath = path.join(__dirname, '../data/characters.json');
+// Definición del esquema de personajes
+const characterSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    class: {
+        type: String,
+        required: true,
+    },
+    level: {
+        type: Number,
+        required: true,
+        default: 1, // Nivel por defecto
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+});
 
-exports.getAllCharacters = (callback) => {
-    fs.readFile(dataFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error("Error reading character data:", err); // Log error
-            return callback(err);
-        }
-        let characters = [];
-        try {
-            characters = JSON.parse(data);
-        } catch (parseErr) {
-            console.error("Error parsing character data:", parseErr);
-            return callback(parseErr);
-        }
-        console.log("Retrieved characters:", characters);
-        callback(null, characters);
-    });
+// Exporta el modelo de personaje
+const Character = mongoose.model('Character', characterSchema);
+
+// Funciones para manejar operaciones de personajes
+exports.getAllCharacters = async () => {
+    return await Character.find().populate('user', 'username'); // Obtiene todos los personajes y su usuario
 };
 
-exports.findCharacterById = (id, callback) => {
-    this.getAllCharacters((err, characters) => {
-        if (err) {
-            console.error("Error retrieving characters:", err);
-            return callback(err);
-        }
-        
-        const character = characters.find(c => c.id.toString() === id.toString());
-        if (!character) {
-            console.log("No character found with ID:", id);
-        }
-
-        callback(null, character);
-    });
+exports.createCharacter = async (characterData) => {
+    const character = new Character(characterData);
+    return await character.save(); // Guarda el nuevo personaje en la base de datos
 };
 
-exports.saveCharacters = (characters, callback) => {
-    const data = JSON.stringify(characters, null, 2);
-    fs.writeFile(dataFilePath, data, 'utf8', (err) => {
-        callback(err); 
-    });
+exports.findCharacterById = async (characterId) => {
+    return await Character.findById(characterId).populate('user', 'username'); // Busca un personaje por ID
+};
+
+exports.saveCharacter = async (character) => {
+    return await character.save(); // Guarda los cambios de un personaje
+};
+
+exports.deleteCharacter = async (characterId) => {
+    return await Character.findByIdAndDelete(characterId); // Elimina un personaje por ID
 };
