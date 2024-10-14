@@ -1,3 +1,4 @@
+// controllers/characterController.js
 const characterModel = require('../models/characterModel');
 
 // Define the handleError function
@@ -6,11 +7,13 @@ const handleError = (err, res) => {
     res.status(500).render('error', { message: 'An error occurred', title: 'Error' });
 };
 
-exports.index = (req, res) => {
-    characterModel.getAllCharacters((err, characters) => {
-        if (err) return handleError(err, res);
+exports.index = async (req, res) => {
+    try {
+        const characters = await characterModel.getAllCharacters();
         res.render('characters/index', { characters });
-    });
+    } catch (err) {
+        handleError(err, res);
+    }
 };
 
 exports.create = (req, res) => {
@@ -21,24 +24,23 @@ exports.keybinds = (req, res) => {
     res.render('keybinds');
 };
 
-exports.select = (req, res) => {
-    characterModel.getAllCharacters((err, characters) => {
-        if (err) return handleError(err, res);
+exports.select = async (req, res) => {
+    try {
+        const characters = await characterModel.getAllCharacters();
 
         if (!characters || characters.length === 0) {
             return res.render('error', { message: 'No characters available', title: 'Error' });
         }
 
         res.render('characters/select', { characters, title: 'Select Character' });
-    });
+    } catch (err) {
+        handleError(err, res);
+    }
 };
 
-exports.store = (req, res) => {
-    characterModel.getAllCharacters((err, characters) => {
-        if (err) return handleError(err, res);
-
+exports.store = async (req, res) => {
+    try {
         const newCharacter = {
-            id: characters.length > 0 ? characters[characters.length - 1].id + 1 : 1,
             name: req.body.name.replace(/<[^>]*>?/g, ''), // Sanitize user input
             characterLevel: 1,
             Hp: 100,
@@ -46,67 +48,58 @@ exports.store = (req, res) => {
             Stamina: 10,
         };
 
-        characters.push(newCharacter); // Add the new character to the array
-
-        // Save the updated characters array to the JSON file
-        characterModel.saveCharacters(characters, (err) => {
-            if (err) return handleError(err, res);
-            res.redirect('/characters');
-        });
-    });
+        await characterModel.createCharacter(newCharacter); // Save the new character to MongoDB
+        res.redirect('/characters');
+    } catch (err) {
+        handleError(err, res);
+    }
 };
 
-exports.edit = (req, res) => {
-    const characterId = parseInt(req.params.id);  // Get character ID from URL
-    console.log("Character ID being requested:", characterId);
+exports.edit = async (req, res) => {
+    const characterId = req.params.id;
 
-    // Ensure that the ID is a valid number
-    if (isNaN(characterId)) {
-        console.log("Invalid character ID");
-        return res.status(400).render('error', { message: 'Invalid character ID', title: 'Error' });
-    }
-
-    characterModel.findCharacterById(characterId, (err, character) => {
-        if (err) {
-            console.error("Error finding character:", err);
-            return handleError(err, res);
-        }
-
+    try {
+        const character = await characterModel.findCharacterById(characterId);
+        
         // If the character is not found, return a 404 error
         if (!character) {
-            console.log("Character not found with ID:", characterId);
             return res.status(404).render('error', { message: 'Character not found', title: 'Error' });
         }
 
         // Correctly render the edit page with the character's data
-        console.log("Found character:", character);
         res.render('characters/edit', { character });
-    });
-};
-exports.update = (req, res) => {
-    characterModel.getAllCharacters((err, characters) => {
-        if (err) return handleError(err, res);
-        const characterIndex = characters.findIndex(c => c.id === parseInt(req.params.id));
-        if (characterIndex >= 0) {
-            characters[characterIndex] = { ...characters[characterIndex], ...req.body };
-            characterModel.saveCharacters(characters, (err) => {
-                if (err) return handleError(err, res);
-                res.redirect('/characters');
-            });
-        } else {
-            res.render('error', { message: 'Character not found' });
-        }
-    });
+    } catch (err) {
+        console.error("Error finding character:", err);
+        return handleError(err, res);
+    }
 };
 
-exports.delete = (req, res) => {
-    characterModel.getAllCharacters((err, characters) => {
-        if (err) return handleError(err, res);
-        // Filter out the character to delete
-        const updatedCharacters = characters.filter(c => c.id !== parseInt(req.params.id));
-        characterModel.saveCharacters(updatedCharacters, (err) => {
-            if (err) return handleError(err, res);
-            res.redirect('/characters'); // Redirect after deletion
-        });
-    });
+exports.update = async (req, res) => {
+    const characterId = req.params.id;
+
+    try {
+        const character = await characterModel.findCharacterById(characterId);
+        
+        if (!character) {
+            return res.status(404).render('error', { message: 'Character not found' });
+        }
+
+        // Update character properties
+        Object.assign(character, req.body);
+        await characterModel.saveCharacter(character); // Save the updated character
+        res.redirect('/characters');
+    } catch (err) {
+        handleError(err, res);
+    }
+};
+
+exports.delete = async (req, res) => {
+    const characterId = req.params.id;
+
+    try {
+        await characterModel.deleteCharacter(characterId); // Delete character from MongoDB
+        res.redirect('/characters'); // Redirect after deletion
+    } catch (err) {
+        handleError(err, res);
+    }
 };

@@ -40,7 +40,6 @@
     <a href="/">Back to Menu</a>
 
     <script>
-        // Load saved keybinds from localStorage
         window.onload = function() {
             const savedKeybinds = JSON.parse(localStorage.getItem('keybinds')) || {};
             document.getElementById('moveUp').value = savedKeybinds.moveUp || 'W';

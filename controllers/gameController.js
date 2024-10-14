@@ -3,19 +3,18 @@ const characterModel = require('../models/characterModel');
 
 // Renderiza la vista principal del juego, mostrando el personaje seleccionado
 exports.view = (req, res) => {
-    // Retrieve the selected character from the session
+    // Recupera el personaje seleccionado de la sesión
     const selectedCharacter = req.session.selectedCharacter;
     
-    // If no character is selected, redirect to the home page
+    // Si no se selecciona ningún personaje, redirige a la página de inicio
     if (!selectedCharacter) {
         console.log("No character selected, redirecting to home.");
-        return res.redirect('/'); // Redirect if no character is selected
+        return res.redirect('/'); // Redirigir si no hay personaje seleccionado
     }
 
-    // Render the game view with the selected character
+    // Renderiza la vista del juego con el personaje seleccionado
     res.render('game/game', { character: selectedCharacter, title: `Game - ${selectedCharacter.name}` });
 };
-
 
 // Renderiza la vista de la página de inicio
 exports.home = (req, res) => {
@@ -23,9 +22,9 @@ exports.home = (req, res) => {
 };
 
 // Renderiza la vista para seleccionar un personaje
-exports.select = (req, res) => {
-    characterModel.getAllCharacters((err, characters) => {
-        if (err) return handleError(err, res);
+exports.select = async (req, res) => {
+    try {
+        const characters = await characterModel.getAllCharacters();
 
         if (!characters || characters.length === 0) {
             return res.render('error', { message: 'No characters available', title: 'Error' });
@@ -33,73 +32,77 @@ exports.select = (req, res) => {
 
         // Solo debe renderizarse una vez
         res.render('characters/select', { characters, title: 'Select Character' });
-    });
+    } catch (err) {
+        console.error("Error retrieving characters:", err);
+        return res.render('error', { message: 'Error retrieving characters', title: 'Error' });
+    }
 };
 
-
-exports.chooseCharacter = (req, res) => {
+exports.chooseCharacter = async (req, res) => {
     const characterId = req.body.characterId;
 
-    // Find the character using the provided ID
-    characterModel.findCharacterById(characterId, (err, character) => {
-        if (err) {
-            console.error("Error finding character:", err);
-            return res.status(500).json({ error: 'Character not found' });
-        }
+    try {
+        // Encuentra el personaje usando el ID proporcionado
+        const character = await characterModel.findCharacterById(characterId);
 
-        // If character is not found
+        // Si no se encuentra el personaje
         if (!character) {
             return res.status(404).json({ error: 'Character not found' });
         }
 
-        // Store the character in the session
+        // Almacena el personaje en la sesión
         req.session.selectedCharacter = character;
         console.log("Selected character stored in session:", req.session.selectedCharacter);
 
-        // Send a successful response
+        // Envía una respuesta exitosa
         res.status(200).json({ character });
-    });
+    } catch (err) {
+        console.error("Error finding character:", err);
+        return res.status(500).json({ error: 'Error finding character' });
+    }
 };
-
-
 
 // Actualiza el nivel del personaje seleccionado en función de su experiencia
-exports.updateLevel = (req, res) => {
-    const gameState = gameModel.getGameState();
-    const character = characterModel.findCharacterById(gameState.characterId);
+exports.updateLevel = async (req, res) => {
+    try {
+        const gameState = gameModel.getGameState();
+        const character = await characterModel.findCharacterById(gameState.characterId);
 
-    if (!character) {
-        return res.status(404).json({ message: 'Character not found' });
+        if (!character) {
+            return res.status(404).json({ message: 'Character not found' });
+        }
+
+        // Comprueba si el personaje ha acumulado suficiente experiencia para subir de nivel
+        if (character.currentEXP >= character.characterEXP) {
+            character.characterLevel += 1; // Aumenta el nivel del personaje
+            character.Hp = Math.floor(character.Hp * 1.05); // Mejora los atributos
+            character.Damage += 3;
+            character.Stamina += 2;
+
+            // Ajusta la experiencia para el siguiente nivel y reinicia la experiencia actual
+            character.characterEXP = Math.floor(character.characterEXP * 1.2);
+            character.currentEXP = 0;
+
+            // Guarda el estado actualizado del personaje
+            await characterModel.saveCharacter(character);
+        }
+
+        // Devuelve el nivel y atributos actualizados del personaje
+        res.json({
+            characterLevel: character.characterLevel,
+            Hp: character.Hp,
+            Damage: character.Damage,
+            Stamina: character.Stamina,
+            characterEXP: character.characterEXP
+        });
+    } catch (err) {
+        console.error("Error updating character level:", err);
+        return res.status(500).json({ message: 'Error updating character level' });
     }
-
-    // Comprueba si el personaje ha acumulado suficiente experiencia para subir de nivel
-    if (character.currentEXP >= character.characterEXP) {
-        character.characterLevel += 1; // Aumenta el nivel del personaje
-        character.Hp = Math.floor(character.Hp * 1.05); // Mejora los atributos
-        character.Damage += 3;
-        character.Stamina += 2;
-
-        // Ajusta la experiencia para el siguiente nivel y reinicia la experiencia actual
-        character.characterEXP = Math.floor(character.characterEXP * 1.2);
-        character.currentEXP = 0;
-
-        // Guarda el estado actualizado del personaje
-        characterModel.saveCharacter(character);
-    }
-
-    // Devuelve el nivel y atributos actualizados del personaje
-    res.json({
-        characterLevel: character.characterLevel,
-        Hp: character.Hp,
-        Damage: character.Damage,
-        Stamina: character.Stamina,
-        characterEXP: character.characterEXP
-    });
 };
 
-// controllers/gameController.js
-
-exports.performAction = (req, res) => {
+// Realiza una acción (moverse, atacar, etc.)
+exports.performAction = async (req, res) => {
     const character = req.session.selectedCharacter; // Usamos el personaje de la sesión
 
     if (!character) {
@@ -127,15 +130,17 @@ exports.performAction = (req, res) => {
             return res.status(400).json({ message: 'Invalid action' });
     }
 
+    // Guarda el estado actualizado del personaje
+    await characterModel.saveCharacter(character);
+
     // Responder con la nueva posición del personaje
     res.json({ character });
 };
 
-
 // Inicia la regeneración de stamina después de una acción
-exports.regenerateStamina = (req, res) => {
+exports.regenerateStamina = async (req, res) => {
     const gameState = gameModel.getGameState();
-    const character = characterModel.findCharacterById(gameState.characterId);
+    const character = await characterModel.findCharacterById(gameState.characterId);
 
     if (!character) {
         return res.status(404).json({ message: 'Character not found' });
@@ -146,7 +151,7 @@ exports.regenerateStamina = (req, res) => {
     character.Stamina = Math.min(character.Stamina + regenerationRate, character.maxStamina);
 
     // Guarda el estado actualizado del personaje
-    characterModel.saveCharacter(character);
+    await characterModel.saveCharacter(character);
 
     res.json({
         message: 'Stamina regenerated',

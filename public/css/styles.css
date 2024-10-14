@@ -1,103 +1,49 @@
 body {
-    font-family: 'Garamond', serif; /* Fuente elegante */
-    background-color: #1a1a1a; /* Fondo oscuro */
-    color: #f5f5f5; /* Texto claro */
+    font-family: 'Garamond', serif;
+    background-color: #1a1a1a; 
+    color: #f5f5f5; 
     margin: 0;
-    padding: 0; /* Ajuste de padding */
+    padding: 0; 
 }
 
-/* Barra de navegación */
-header {
-    background-color: #333; /* Color de fondo de la barra de navegación */
-    color: white; /* Color del texto */
-    padding: 10px 20px; /* Espaciado interno */
-    position: fixed; /* Posición fija para que la barra se quede en la parte superior */
-    width: 100%; /* Ancho completo */
-    top: 0; /* Colocarla en la parte superior */
-    z-index: 10; /* Asegura que esté por encima del contenido */
-}
-
-/* Navegación */
-nav {
-    display: flex; /* Utiliza flexbox para organizar el contenido */
-    justify-content: space-between; /* Espacio entre el título y los enlaces */
-    align-items: center; /* Alinear verticalmente los elementos al centro */
-}
-
-/* Título */
-nav h1 {
-    margin: 0; /* Eliminar márgenes del título para mantenerlo compacto */
-    font-size: 24px; /* Ajustar el tamaño de fuente según sea necesario */
-    flex: 1; /* Permitir que el título ocupe espacio */
-}
-
-/* Estilos de la lista de navegación */
-nav ul {
-    list-style-type: none; /* Quitar los puntos de las listas */
-    padding: 0; /* Quitar el padding */
-    margin: 0; /* Quitar el margin */
-    display: flex; /* Utilizar flexbox para alinear los elementos */
-    flex: 1; /* Permitir que la lista ocupe espacio */
-    justify-content: space-evenly;
-}
-
-nav ul li {
-    margin-left: 20px; /* Espaciado entre los elementos de la lista */
-}
-
-nav ul li a {
-    color: white; /* Color de los enlaces */
-    text-decoration: none; /* Sin subrayado */
-    transition: color 0.3s; /* Transición suave */
-}
-
-nav ul li a:hover {
-    color: #ffcc00; /* Color más claro al pasar el ratón */
-}
-
-/* Ajustes para el contenido principal */
 main {
-    padding-top: 60px; /* Dejar espacio para la barra de navegación */
+    padding-top: 60px; 
 }
 
-/* Footer */
 footer {
     bottom: 0;
     position: fixed;
-    text-align: center; /* Centrar el texto del pie de página */
+    text-align: center;
     padding: 20px;
-    color: white; /* Color del texto */
-}
-/* Encabezados */
-h1, h2, h3 {
-    color: #e0b000; /* Color dorado para títulos */
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); /* Sombra para un efecto dramático */
+    color: white;
 }
 
-/* Enlaces */
+h1, h2, h3 {
+    color: #e0b000; 
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); 
+}
+
 a {
-    color: #e0b000; /* Color dorado para enlaces */
+    color: #e0b000; 
     text-decoration: none;
     transition: color 0.3s;
 }
 
 a:hover {
-    color: #ffcc00; /* Color más claro al pasar el ratón */
+    color: #ffcc00; 
 }
 
-/* Contenedor de personajes */
 div {
-    background-color: #2e2e2e; /* Fondo de los personajes */
-    border: 1px solid #444; /* Bordes oscuros */
+    background-color: #2e2e2e;
+    border: 1px solid #444;
     border-radius: 8px;
     padding: 15px;
     margin: 10px 0;
 }
 
-/* Botones */
 button {
-    background-color: #444; /* Fondo oscuro */
-    color: #f5f5f5; /* Texto claro */
+    background-color: #444;
+    color: #f5f5f5;
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
@@ -106,10 +52,9 @@ button {
 }
 
 button:hover {
-    background-color: #666; /* Fondo más claro al pasar el ratón */
+    background-color: #666;
 }
 
-/* Estilo del formulario */
 form {
     background-color: #2e2e2e;
     border: 1px solid #444;
@@ -118,7 +63,6 @@ form {
     margin-top: 10px;
 }
 
-/* Campos de entrada */
 input[type="text"],
 input[type="number"],
 input[type="submit"] {
@@ -127,20 +71,19 @@ input[type="submit"] {
     margin: 5px 0;
     border: 1px solid #444;
     border-radius: 5px;
-    background-color: #333; /* Fondo de los campos */
-    color: #f5f5f5; /* Texto claro */
+    background-color: #333;
+    color: #f5f5f5;
 }
 
 input[type="submit"] {
-    background-color: #e0b000; /* Botón dorado */
-    color: #1a1a1a; /* Texto oscuro */
+    background-color: #e0b000;
+    color: #1a1a1a;
 }
 
 input[type="submit"]:hover {
-    background-color: #ffcc00; /* Botón dorado más claro al pasar el ratón */
+    background-color: #ffcc00; 
 }
 
-/* Enlaces de retroceso */
 a.back {
     color: #f5f5f5;
     text-decoration: underline;

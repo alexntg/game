@@ -1,46 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Game - <%= character.name %></title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        body {
-            margin: 0;
-            background-color: #000; 
-            display: flex;
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-        }
-        #game-container {
-            position: relative;
-            width: 100vh; 
-            height: 100vh; 
-            overflow: hidden; 
-        }
-        #map {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            background-image: url('/images/house.jpg');
-            background-size: cover;
-        }
-        #character {
-            border: none;
-            background-color: rgba(0,0,0,0);
-            position: absolute;
-            width: 50px; 
-            height: 50px; 
-            background-image: url('/images/caveman.png'); 
-            background-size: cover;
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            z-index: 1;
-        }
-    </style>
-</head>
 <body>
     <div id="game-container">
         <div id="map"></div>
@@ -59,18 +16,16 @@
         const moveLeft = savedKeybinds.moveLeft || 'a';
         const moveRight = savedKeybinds.moveRight || 'd';
 
-        
-        const attackKey = savedKeybinds.attack || 'Left Click';
-
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case moveUp:
-                    mapY -= moveDistance; 
+                    mapY -= moveDistance;
                     break;
                 case moveDown:
                     mapY += moveDistance;
+                    break;
                 case moveLeft:
-                    mapX -= moveDistance; 
+                    mapX -= moveDistance;
                     break;
                 case moveRight:
                     mapX += moveDistance;
@@ -79,6 +34,7 @@
                     return;
             }
 
+            // Apply the translation to the map
             mapElement.style.transform = `translate(${mapX}px, ${mapY}px)`;
         });
 
