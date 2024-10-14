@@ -3,11 +3,19 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
+const mongoose = require('mongoose');
+const http = require('http');
+const socketio = require('socket.io');
+
+// Controladores
 const characterController = require('./controllers/characterController');
 const gameController = require('./controllers/gameController');
 const authController = require('./controllers/authController'); // Controlador de autenticación
-const mongoose = require('mongoose'); // Asegúrate de requerir mongoose si no lo has hecho
+
 const app = express();
+const server = http.createServer(app); // Crear servidor HTTP
+const io = socketio(server); // Inicializar socket.io
+
 const PORT = process.env.PORT || 3000;
 
 // Conexión a MongoDB
@@ -25,14 +33,16 @@ app.use(session({
     secret: 'clave_Secreta',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: false } // Cambia esto a true si estás usando HTTPS
 }));
 
+// Configurar el motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout', 'layouts/layout');
 app.set('views', path.join(__dirname, 'views'));
 
+// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -44,9 +54,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Ruta de Login
+// Rutas de autenticación
 app.get('/login', (req, res) => {
-    res.render('login', { title: 'Login', error: null }); // Siempre pasamos 'error' como null
+    res.render('login', { title: 'Login', error: null });
 });
 
 app.post('/login', (req, res) => {
@@ -61,7 +71,6 @@ app.post('/login', (req, res) => {
     }
 });
 
-// Ruta de Logout
 app.post('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/');
@@ -92,10 +101,11 @@ app.post('/characters/:id/delete', characterController.delete);
 
 app.get('/keybinds', characterController.keybinds);
 
-// Rutas de juego
+// Rutas del juego
 app.get('/game', gameController.view);
 app.post('/game/select', gameController.chooseCharacter);
 
-app.listen(PORT, () => {
+// Escuchar en el puerto configurado
+server.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

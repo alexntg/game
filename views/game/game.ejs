@@ -1,14 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game - <%= character.name %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            margin: 0;
+            background-color: #000; 
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        #game-container {
+            position: relative;
+            width: 800px; 
+            height: 600px; 
+            overflow: hidden; 
+            border: 1px solid white;
+            background-color: #f0f0f0; /* Light background to see if container is visible */
+        }
+        #map {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-image: url('/images/house.jpg');
+            background-size: cover;
+            z-index: 1;
+        }
+        .character {
+            position: absolute;
+            width: 50px; 
+            height: 50px; 
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 2;
+        }
+        .knight {
+            background-image: url('/images/knight/Sprites/with_outline/IDLE.png');
+            border: 1px solid red;
+        }
+        .demon {
+            background-image: url('/images/boss/individual_sprites/demon/01_demon_idle/demon_idle_1');
+            border: 1px solid blue; /* Temporary border to see character boundaries */
+        }
+    </style>
+</head>
 <body>
     <div id="game-container">
         <div id="map"></div>
-        <div id="character"></div>
+        <div id="coordinates"></div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        let mapX = 0; 
-        let mapY = 0; 
-        const moveDistance = 10; 
+        const socket = io();
+        const gameContainer = document.getElementById('game-container');
         const mapElement = document.getElementById('map');
+        const coordinatesElement = document.getElementById('coordinates');
+        let players = {};
+        let localPlayer = null;
+
+        const moveSpeed = 5;
+        const idleAnimationFrames = [
+            '/images/knight/Sprites/with_outline/IDLE.png',
+            // Asegúrate de añadir más frames para la animación idle
+        ];
+        const runAnimationFrames = [
+            '/images/knight/Sprites/with_outline/RUN.png',
+            // Asegúrate de añadir más frames para la animación de correr
+        ];
+        const attackAnimationFrames = [
+            '/images/knight/Sprites/with_outline/ATTACK1.png',
+            // Añadir más frames si es necesario
+        ];
+
+        let currentFrame = 0;
+        let animationInterval;
+        let currentAnimation = 'idle';
+
+        function preloadImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(url);
+                img.onerror = () => reject(url);
+                img.src = url;
+            });
+        }
+
+        Promise.all([
+            preloadImage('/images/knight/Sprites/with_outline/IDLE.png'),
+            preloadImage('/images/knight/Sprites/with_outline/RUN.png'),
+            preloadImage('/images/knight/Sprites/with_outline/ATTACK1.png'),
+            preloadImage('/images/demon/01_demon_idle.png'),
+            preloadImage('/images/house.jpg')
+        ]).then(() => {
+            console.log('All images loaded successfully');
+            startGame();
+        }).catch((error) => {
+            console.error('Failed to load image:', error);
+        });
+
+        function startGame() {
+            socket.on('connect', () => {
+                localPlayer = {
+                    id: socket.id,
+                    x: 400,
+                    y: 300,
+                    type: 'knight'
+                };
+                createPlayerElement(localPlayer);
+                socket.emit('newPlayer', localPlayer);
+            });
+        }
+
+        socket.on('newPlayer', (player) => {
+            if (player.id !== socket.id) {
+                players[player.id] = player;
+                createPlayerElement(player);
+            }
+        });
+
+        socket.on('existingPlayers', (existingPlayers) => {
+            Object.values(existingPlayers).forEach(player => {
+                if (player.id !== socket.id) {
+                    players[player.id] = player;
+                    createPlayerElement(player);
+                }
+            });
+        });
+
+        socket.on('movePlayer', (player) => {
+            if (player.id !== socket.id) {
+                players[player.id] = player;
+                updatePlayerPosition(player);
+            }
+        });
+
+        socket.on('removePlayer', (player) => {
+            if (players[player.id]) {
+                const playerElement = document.getElementById(player.id);
+                if (playerElement) {
+                    gameContainer.removeChild(playerElement);
+                }
+                delete players[player.id];
+            }
+        });
+
+        function createPlayerElement(player) {
+            const playerElement = document.createElement('div');
+            playerElement.id = player.id;
+            playerElement.className = `character ${player.type}`;
+            updatePlayerPosition(player);
+            gameContainer.appendChild(playerElement);
+            console.log(`Created player element: ${player.type} at (${player.x}, ${player.y})`);
+        }
+
+        function updatePlayerPosition(player) {
+            const playerElement = document.getElementById(player.id);
+            if (playerElement) {
+                playerElement.style.left = `${player.x}px`;
+                playerElement.style.top = `${player.y}px`;
+                if (player.id === socket.id) {
+                    coordinatesElement.textContent = `X: ${Math.round(player.x)}, Y: ${Math.round(player.y)}`;
+                }
+            }
+        }
 
         const savedKeybinds = JSON.parse(localStorage.getItem('keybinds')) || {};
         const moveUp = savedKeybinds.moveUp || 'w';
@@ -17,36 +176,92 @@
         const moveRight = savedKeybinds.moveRight || 'd';
 
         document.addEventListener('keydown', (event) => {
-            switch (event.key) {
-                case moveUp:
-                    mapY -= moveDistance;
-                    break;
-                case moveDown:
-                    mapY += moveDistance;
-                    break;
-                case moveLeft:
-                    mapX -= moveDistance;
-                    break;
-                case moveRight:
-                    mapX += moveDistance;
-                    break;
-                default:
-                    return;
-            }
+            if (!localPlayer) return;
 
-            // Apply the translation to the map
-            mapElement.style.transform = `translate(${mapX}px, ${mapY}px)`;
+            const playerElement = document.getElementById(socket.id);
+            if (!playerElement) return;
+
+            if (event.key === moveUp || event.key === moveDown || event.key === moveLeft || event.key === moveRight) {
+                // Si el jugador se mueve, iniciar la animación de correr
+                startAnimation(runAnimationFrames, 'run');
+                switch (event.key) {
+                    case moveUp:
+                        localPlayer.y -= moveSpeed;
+                        break;
+                    case moveDown:
+                        localPlayer.y += moveSpeed;
+                        break;
+                    case moveLeft:
+                        localPlayer.x -= moveSpeed;
+                        break;
+                    case moveRight:
+                        localPlayer.x += moveSpeed;
+                        break;
+                    default:
+                        return;
+                }
+
+                // Asegurarse de que el jugador permanezca dentro del contenedor del juego
+                localPlayer.x = Math.max(0, Math.min(localPlayer.x, gameContainer.clientWidth - 50)); // 50 para el ancho del personaje
+                localPlayer.y = Math.max(0, Math.min(localPlayer.y, gameContainer.clientHeight - 50)); // 50 para la altura del personaje
+
+                updatePlayerPosition(localPlayer);
+                socket.emit('move', { x: localPlayer.x, y: localPlayer.y });
+
+                // Detener la animación idle
+                clearTimeout(stopIdleTimeout);
+                stopIdleTimeout = setTimeout(stopAnimation, 500);
+            }
         });
+
+        function startAnimation(frames, animationType) {
+            currentAnimation = animationType;
+            clearInterval(animationInterval);
+            currentFrame = 0;
+
+            animationInterval = setInterval(() => {
+                const playerElement = document.getElementById(socket.id);
+                if (playerElement) {
+                    playerElement.style.backgroundImage = `url(${frames[currentFrame]})`;
+                    currentFrame = (currentFrame + 1) % frames.length;
+                }
+            }, 200); // Cambia de frame cada 200 ms
+        }
+
+        function stopAnimation() {
+            clearInterval(animationInterval);
+            const playerElement = document.getElementById(socket.id);
+            if (playerElement) {
+                playerElement.style.backgroundImage = `url(${idleAnimationFrames[0]})`; // Regresar a la imagen idle
+            }
+        }
 
         document.addEventListener('click', (event) => {
             if (event.button === 0) {
-                document.getElementById('character').style.backgroundImage = 'url("/images/basicattack1.png")';
-                
-                setTimeout(() => {
-                    document.getElementById('character').style.backgroundImage = 'url("/images/caveman.png")';
-                }, 300);
+                const playerElement = document.getElementById(socket.id);
+                if (playerElement) {
+                    startAnimation(attackAnimationFrames, 'attack');
+
+                    setTimeout(() => {
+                        stopAnimation();
+                    }, 300); // Duración del ataque
+                }
             }
         });
+
+        let stopIdleTimeout = setTimeout(stopAnimation, 500); // Iniciar el timeout para idle
+
+        // Agregar un demonio para fines de prueba
+        setTimeout(() => {
+            const demonPlayer = {
+                id: 'demon1',
+                x: 200,
+                y: 200,
+                type: 'demon'
+            };
+            players[demonPlayer.id] = demonPlayer;
+            createPlayerElement(demonPlayer);
+        }, 1000);
     </script>
 </body>
 </html>

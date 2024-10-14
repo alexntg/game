@@ -1,2 +1,16 @@
-/node_modules/*
-password.txtx/
+# Ignorar la carpeta node_modules
+/node_modules/
+
+# Ignorar cualquier archivo de texto con contraseñas (mejor no tener estos archivos en tu proyecto)
+password.txt
+
+# Ignorar el archivo package-lock.json
+package-lock.json
+
+# Ignorar archivos de entorno (importante para credenciales y configuraciones sensibles)
+.env
+
+# Ignorar archivos de logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
