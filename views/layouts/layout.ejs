@@ -27,8 +27,7 @@
             background-color: #343a40;
             color: #fff;
             padding: 1rem;
-            position: absolute;
-            bottom: 0;
+            position: relative;
             width: 100%;
         }
     </style>
@@ -60,6 +59,11 @@
                         <li class="nav-item">
                             <span class="nav-link">Welcome, <%= username %>!</span>
                         </li>
+                        <% if (isAdmin) { %> <!-- Solo el administrador verá este botón -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/edit">Editar</a>
+                            </li>
+                        <% } %>
                     <% } else { %>
                         <li class="nav-item">
                             <a class="nav-link" href="/login">Login</a>

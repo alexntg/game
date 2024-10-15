@@ -7,19 +7,18 @@ const mongoose = require('mongoose');
 const http = require('http');
 const socketio = require('socket.io');
 
-// Controladores
 const characterController = require('./controllers/characterController');
 const gameController = require('./controllers/gameController');
-const authController = require('./controllers/authController'); // Controlador de autenticación
+const authController = require('./controllers/authController'); 
+const adminController = require('./controllers/adminController'); 
 
 const app = express();
-const server = http.createServer(app); // Crear servidor HTTP
-const io = socketio(server); // Inicializar socket.io
+const server = http.createServer(app); 
+const io = socketio(server); 
 
 const PORT = process.env.PORT || 3000;
 
-// Conexión a MongoDB
-const mongoURI = 'mongodb://localhost:27017/tuNombreDeBaseDeDatos'; // Cambia esto por tu URI
+const mongoURI = 'mongodb://localhost:27017/tuNombreDeBaseDeDatos'; 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Conexión a MongoDB exitosa');
@@ -27,34 +26,40 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch(err => {
         console.error('Error en la conexión a MongoDB:', err);
     });
-
-// Configurar la sesión
+    
 app.use(session({
     secret: 'clave_Secreta',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // Cambia esto a true si estás usando HTTPS
+    cookie: { secure: false }
 }));
 
-// Configurar el motor de plantillas EJS
+app.get('/admin/edit', adminController.adminEdit);
+
+
+exports.adminEdit = (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.render('error404', { title: 'Página no encontrada' });
+    }
+    res.render('admin/edit', { title: 'Editar' });
+};
+
+
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout', 'layouts/layout');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware para definir variables globales en todas las vistas
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isAuthenticated || false;
     res.locals.username = req.session.username || null;
     next();
 });
 
-// Rutas de autenticación
 app.get('/login', (req, res) => {
     res.render('login', { title: 'Login', error: null });
 });
@@ -68,23 +73,21 @@ app.post('/logout', (req, res) => {
     });
 });
 
-// Ruta principal
 app.get('/', (req, res) => {
     res.render('index', { title: 'Landing Page' });
 });
 
-// Rutas de registro
 app.get('/register', (req, res) => {
     res.render('register', { title: 'Registro', error: null });
 });
 
-app.post('/register', authController.register); // Llama al controlador de registro
+app.post('/register', authController.register); 
 
 app.get('/check-users', async (req, res) => {
     try {
-        const users = await User.find(); // Encuentra todos los usuarios
+        const users = await User.find(); 
         if (users.length > 0) {
-            res.send(users); // Envía los usuarios como respuesta
+            res.send(users); 
         } else {
             res.send('No se encontraron usuarios en la base de datos.');
         }
@@ -94,14 +97,13 @@ app.get('/check-users', async (req, res) => {
     }
 });
 
-const Character = require('./models/characterModel'); // Asegúrate de que la ruta sea correcta
+const Character = require('./models/characterModel'); 
 
-// Ruta para consultar todos los personajes
 app.get('/check-characters', async (req, res) => {
     try {
-        const characters = await Character.find().populate('user'); // Encuentra todos los personajes y sus usuarios relacionados
+        const characters = await Character.find().populate('user');
         if (characters.length > 0) {
-            res.send(characters); // Envía los personajes como respuesta
+            res.send(characters); 
         } else {
             res.send('No se encontraron personajes en la base de datos.');
         }
