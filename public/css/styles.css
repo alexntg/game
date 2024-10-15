@@ -1,3 +1,4 @@
+/* Estilos personalizados */
 body {
     font-family: 'Garamond', serif;
     background-color: #1a1a1a; 
@@ -8,14 +9,16 @@ body {
 
 main {
     padding-top: 60px; 
+    flex: 1; /* Permitir que el main ocupe el espacio restante */
+    padding: 2rem 0; /* Ajustar el padding del main */
 }
 
 footer {
-    bottom: 0;
-    position: fixed;
+    background-color: #343a40; /* Cambiado para coincidir con el diseño */
+    color: white;
     text-align: center;
     padding: 20px;
-    color: white;
+    margin-top: auto; /* Asegurarse de que el footer se mantenga al final */
 }
 
 h1, h2, h3 {
@@ -87,4 +90,25 @@ input[type="submit"]:hover {
 a.back {
     color: #f5f5f5;
     text-decoration: underline;
+}
+
+/* Ajustes para el navbar */
+.navbar {
+    background-color: #343a40; /* Fondo oscuro para el navbar */
+}
+
+.navbar-nav .nav-link {
+    color: #e0b000; /* Color de texto de los enlaces */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffcc00; /* Color de texto al pasar el ratón */
+}
+
+.navbar-brand {
+    color: #e0b000; /* Color del logo */
+}
+
+.navbar-brand:hover {
+    color: #ffcc00; /* Color del logo al pasar el ratón */
 }

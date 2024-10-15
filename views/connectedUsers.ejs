@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Usuarios Conectados</h1>
+        <ul id="userList" class="list-group">
+            <li class="list-group-item">Cargando usuarios...</li>
+        </ul>
+    </div>
+    
+    <script>
+        const socket = io();
+
+        // Obtiene el nombre de usuario de la sesión (incrustado en el HTML)
+        const username = "<%= username %>";  // Incrustar el nombre de usuario desde el servidor
+
+        if (username) {
+            socket.emit('registerUser', username); // Emitir el nombre de usuario
+        } else {
+            console.error('No hay nombre de usuario disponible.');
+        }
+
+        socket.on('updateUserList', (users) => {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = ''; // Limpiar la lista actual
+
+            if (users.length > 0) {
+                users.forEach(user => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = user;
+                    userList.appendChild(li);
+                });
+            } else {
+                userList.innerHTML = '<li class="list-group-item">No hay usuarios conectados.</li>';
+            }
+        });
+    </script>
+</body>
+</html>

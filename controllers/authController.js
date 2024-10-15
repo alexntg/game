@@ -22,6 +22,7 @@ exports.register = async (req, res) => {
         const newUser = new User({
             username,
             password: hashedPassword,
+            isAdmin: false
         });
 
         await newUser.save();
@@ -63,14 +64,25 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.logout = (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error al cerrar sesión:', err);
+            return res.redirect('/');
+        }
+        res.clearCookie('connect.sid'); 
+        res.redirect('/'); 
+    });
+};
+
 
 exports.logout = (req, res) => {
-    req.session.destroy((err) => {
+    req.session.destroy(err => {
         if (err) {
-            console.error("Error al cerrar sesión:", err);
-            return res.redirect('/'); 
+            console.error('Error al cerrar sesión:', err);
+            return res.redirect('/');
         }
-
+        res.clearCookie('connect.sid');
         res.redirect('/');
     });
 };

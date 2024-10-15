@@ -3,41 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Configure Keybinds</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        main {
+            padding: 2rem 0; /* Mantiene la misma separación que en el layout general */
+        }
+    </style>
 </head>
 <body>
-    <h1>Configure Keybinds</h1>
 
-    <form id="keybindsForm">
-        <div>
-            <label for="moveUp">Move Up (default: W):</label>
-            <input type="text" id="moveUp" name="moveUp" value="W">
-        </div>
-        <div>
-            <label for="moveLeft">Move Left (default: A):</label>
-            <input type="text" id="moveLeft" name="moveLeft" value="A">
-        </div>
-        <div>
-            <label for="moveDown">Move Down (default: S):</label>
-            <input type="text" id="moveDown" name="moveDown" value="S">
-        </div>
-        <div>
-            <label for="moveRight">Move Right (default: D):</label>
-            <input type="text" id="moveRight" name="moveRight" value="D">
-        </div>
-        <div>
-            <label for="attack">Attack (default: Left Click):</label>
-            <input type="text" id="attack" name="attack" value="Left Click">
-        </div>
-        <div>
-            <label for="dodge">Dodge (default: Right Click):</label>
-            <input type="text" id="dodge" name="dodge" value="Right Click">
-        </div>
-        
-        <button type="button" onclick="saveKeybinds()">Save Keybinds</button>
-    </form>
+    <!-- Main content area -->
+    <main class="container">
+        <h1>Configure Keybinds</h1>
+        <form id="keybindsForm">
+            <div class="form-group">
+                <label for="moveUp">Move Up (default: W):</label>
+                <input type="text" id="moveUp" name="moveUp" class="form-control" value="W">
+            </div>
+            <div class="form-group">
+                <label for="moveLeft">Move Left (default: A):</label>
+                <input type="text" id="moveLeft" name="moveLeft" class="form-control" value="A">
+            </div>
+            <div class="form-group">
+                <label for="moveDown">Move Down (default: S):</label>
+                <input type="text" id="moveDown" name="moveDown" class="form-control" value="S">
+            </div>
+            <div class="form-group">
+                <label for="moveRight">Move Right (default: D):</label>
+                <input type="text" id="moveRight" name="moveRight" class="form-control" value="D">
+            </div>
+            <div class="form-group">
+                <label for="attack">Attack (default: Left Click):</label>
+                <input type="text" id="attack" name="attack" class="form-control" value="Left Click">
+            </div>
+            <div class="form-group">
+                <label for="dodge">Dodge (default: Right Click):</label>
+                <input type="text" id="dodge" name="dodge" class="form-control" value="Right Click">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="saveKeybinds()">Save Keybinds</button>
+        </form>
 
-    <a href="/">Back to Menu</a>
+        <a href="/" class="btn btn-link">Back to Menu</a>
+    </main>
+
+    <!-- Bootstrap JS and dependencies (jQuery and Popper.js) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
         window.onload = function() {

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Game - <%= character.name %></title>
-    <link rel="stylesheet" href="/css/styles.css">
     <style>
         body {
             margin: 0;
@@ -44,7 +43,7 @@
         }
         .demon {
             background-image: url('/images/boss/individual_sprites/demon/01_demon_idle/demon_idle_1');
-            border: 1px solid blue; /* Temporary border to see character boundaries */
+            border: 1px solid blue;
         }
     </style>
 </head>
@@ -54,7 +53,7 @@
         <div id="coordinates"></div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js" ></script>
     <script>
         const socket = io();
         const gameContainer = document.getElementById('game-container');
@@ -175,6 +174,28 @@
         const moveLeft = savedKeybinds.moveLeft || 'a';
         const moveRight = savedKeybinds.moveRight || 'd';
 
+        function startAnimation(frames, animationType) {
+            currentAnimation = animationType;
+            clearInterval(animationInterval);
+            currentFrame = 0;
+
+            animationInterval = setInterval(() => {
+                const playerElement = document.getElementById(socket.id);
+                if (playerElement) {
+                    playerElement.style.backgroundImage = `url(${frames[currentFrame]})`;
+                    currentFrame = (currentFrame + 1) % frames.length;
+                }
+            }, 200); // Cambia de frame cada 200 ms
+        }
+
+        function stopAnimation() {
+            clearInterval(animationInterval);
+            const playerElement = document.getElementById(socket.id);
+            if (playerElement) {
+                playerElement.style.backgroundImage = `url(${idleAnimationFrames[0]})`; // Regresar a la imagen idle
+            }
+        }
+
         document.addEventListener('keydown', (event) => {
             if (!localPlayer) return;
 
@@ -214,27 +235,6 @@
             }
         });
 
-        function startAnimation(frames, animationType) {
-            currentAnimation = animationType;
-            clearInterval(animationInterval);
-            currentFrame = 0;
-
-            animationInterval = setInterval(() => {
-                const playerElement = document.getElementById(socket.id);
-                if (playerElement) {
-                    playerElement.style.backgroundImage = `url(${frames[currentFrame]})`;
-                    currentFrame = (currentFrame + 1) % frames.length;
-                }
-            }, 200); // Cambia de frame cada 200 ms
-        }
-
-        function stopAnimation() {
-            clearInterval(animationInterval);
-            const playerElement = document.getElementById(socket.id);
-            if (playerElement) {
-                playerElement.style.backgroundImage = `url(${idleAnimationFrames[0]})`; // Regresar a la imagen idle
-            }
-        }
 
         document.addEventListener('click', (event) => {
             if (event.button === 0) {

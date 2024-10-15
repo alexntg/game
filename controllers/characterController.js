@@ -1,5 +1,6 @@
 // controllers/characterController.js
 const characterModel = require('../models/characterModel');
+const validator = require('validator'); // Importa el validador
 
 // Función para manejar errores
 const handleError = (err, res) => {
@@ -9,10 +10,36 @@ const handleError = (err, res) => {
 
 exports.index = async (req, res) => {
     try {
-        const characters = await characterModel.getAllCharacters();
-        res.render('characters/index', { characters });
+        const users = await getAllUsers();
+        const onlineUsers = users.filter(user => user.isOnline);
+        const offlineUsers = users.filter(user => !user.isOnline);
+
+        const populatedOnlineUsers = await Promise.all(onlineUsers.map(async user => {
+            const characters = await characterModel.getAllCharactersByUserId(user._id);
+            return { ...user.toObject(), characters };
+        }));
+
+        const populatedOfflineUsers = await Promise.all(offlineUsers.map(async user => {
+            const characters = await characterModel.getAllCharactersByUserId(user._id);
+            return { ...user.toObject(), characters };
+        }));
+
+        res.render('characters/index', {
+            onlineUsers: populatedOnlineUsers,
+            offlineUsers: populatedOfflineUsers,
+            title: 'All Characters'
+        });
     } catch (err) {
         handleError(err, res);
+    }
+};
+
+exports.getAllUsers = async () => {
+    try {
+        return await User.find().select('username isOnline');
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
     }
 };
 
@@ -26,7 +53,13 @@ exports.keybinds = (req, res) => {
 
 exports.select = async (req, res) => {
     try {
-        const characters = await characterModel.getAllCharacters();
+        const userId = req.session.userId;
+
+        if (!userId) {
+            return res.status(403).render('error', { message: 'You must be logged in to view your characters.', title: 'Access Denied' });
+        }
+
+        const characters = await characterModel.getAllCharactersByUserId(userId);
 
         if (!characters || characters.length === 0) {
             return res.render('error', { message: 'No characters available', title: 'Error' });
@@ -38,34 +71,40 @@ exports.select = async (req, res) => {
     }
 };
 
+
 exports.store = async (req, res) => {
+    console.log('Request Body:', req.body); 
+
     try {
         const newCharacter = {
-            name: req.body.name.replace(/<[^>]*>?/g, ''), // Sanitiza la entrada del usuario
-            class: req.body.class.replace(/<[^>]*>?/g, ''), // Sanitiza la clase
-            level: req.body.level || 1, // Asigna nivel 1 si no se proporciona otro
-            user: req.session.userId, // Se asume que el ID del usuario está guardado en la sesión
+            name: validator.escape(req.body.name), 
+            class: req.body.class ? validator.escape(req.body.class) : 'Unknown', 
+            level: parseInt(req.body.level, 10) || 1,
+            user: req.session.userId, 
         };
 
-        await characterModel.createCharacter(newCharacter); // Guarda el nuevo personaje en MongoDB
-        res.redirect('/characters');
+        if (!newCharacter.user) {
+            return res.status(403).render('error', { message: 'User is not logged in', title: 'Error' });
+        }
+
+        await characterModel.createCharacter(newCharacter); 
+        res.redirect('/characters/select'); 
     } catch (err) {
         handleError(err, res);
     }
 };
+
 
 exports.edit = async (req, res) => {
     const characterId = req.params.id;
 
     try {
         const character = await characterModel.findCharacterById(characterId);
-        
-        // Si no se encuentra el personaje, retorna un error 404
+
         if (!character) {
             return res.status(404).render('error', { message: 'Character not found', title: 'Error' });
         }
 
-        // Renderiza correctamente la página de edición con los datos del personaje
         res.render('characters/edit', { character });
     } catch (err) {
         console.error("Error finding character:", err);
@@ -78,15 +117,14 @@ exports.update = async (req, res) => {
 
     try {
         const character = await characterModel.findCharacterById(characterId);
-        
+
         if (!character) {
             return res.status(404).render('error', { message: 'Character not found' });
         }
 
-        // Actualiza las propiedades del personaje
-        character.name = req.body.name.replace(/<[^>]*>?/g, ''); // Sanitiza la entrada
-        character.class = req.body.class.replace(/<[^>]*>?/g, ''); // Sanitiza la clase
-        character.level = req.body.level || character.level; // Solo actualiza si se proporciona un nuevo nivel
+        character.name = validator.escape(req.body.name); // Sanitiza la entrada
+        character.class = validator.escape(req.body.class); // Sanitiza la clase
+        character.level = parseInt(req.body.level, 10) || character.level; // Solo actualiza si se proporciona un nuevo nivel
 
         await characterModel.saveCharacter(character); // Guarda el personaje actualizado
         res.redirect('/characters');

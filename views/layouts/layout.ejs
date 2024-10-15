@@ -5,9 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         body {
             background-color: #f8f9fa;
         }
+
+        header {
+            width: 100%;
+        }
+
+        /* Navbar styles */
         .navbar {
             padding: 0.5rem 1rem;
         }
@@ -23,16 +36,36 @@
         .navbar-nav .nav-link {
             padding: 0.5rem;
         }
+        .navbar-nav .logout-link {
+            background: none; /* Sin fondo para que se vea como enlace */
+            border: none; /* Sin borde */
+            color: inherit; /* Hereda el color del texto del navbar */
+            cursor: pointer; /* Cambia el cursor a puntero */
+        }
+        .navbar-nav .logout-link:hover {
+            background-color: #e2e6ea; /* Color de fondo para hover */
+            color: #000; /* Cambia el color del texto en hover */
+        }
+
+        /* Content area will stretch to fill the space between navbar and footer */
+        main {
+            flex: 1; /* Esto hace que el main ocupe el espacio restante entre navbar y footer */
+            padding: 2rem 0;
+        }
+
+        /* Footer styles */
         footer {
             background-color: #343a40;
             color: #fff;
             padding: 1rem;
-            position: relative;
+            text-align: center;
             width: 100%;
         }
     </style>
 </head>
 <body>
+
+    <!-- Navbar -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="/">My Game</a>
@@ -45,25 +78,26 @@
                         <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/characters">Characters</a>
+                        <a class="nav-link" href="/characters/select">Characters</a> 
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/game">Game</a>
                     </li>
-                    <% if (isAuthenticated) { %> <!-- Verificamos si el usuario está autenticado -->
+                    <% if (isAuthenticated) { %> 
                         <li class="nav-item">
                             <form action="/logout" method="POST" style="display:inline;">
                                 <button type="submit" class="btn btn-link nav-link">Logout</button>
                             </form>
                         </li>
-                        <li class="nav-item">
-                            <span class="nav-link">Welcome, <%= username %>!</span>
-                        </li>
-                        <% if (isAdmin) { %> <!-- Solo el administrador verá este botón -->
+
+                        <% if (isAdmin) { %> 
                             <li class="nav-item">
                                 <a class="nav-link" href="/admin/edit">Editar</a>
                             </li>
                         <% } %>
+                        <li class="nav-item">
+                            <span class="nav-link">Welcome, <%= username %>!</span>
+                        </li>
                     <% } else { %>
                         <li class="nav-item">
                             <a class="nav-link" href="/login">Login</a>
@@ -74,11 +108,13 @@
         </nav>
     </header>
 
-    <main class="container mt-4">
+    <!-- Main content area -->
+    <main class="container">
         <%- body %> 
     </main>
 
-    <footer class="text-center mt-4">
+    <!-- Footer -->
+    <footer>
         <p>&copy; 2024 My Game. All rights reserved.</p>
     </footer>
 

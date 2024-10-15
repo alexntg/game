@@ -1,0 +1,44 @@
+<h1>Panel de Administración</h1>
+
+<% if (typeof userCharacters !== 'undefined') { %>
+    <p>Número de usuarios: <%= userCharacters.length %></p>
+    
+    <% if (userCharacters.length > 0) { %>
+        <% userCharacters.forEach(user => { %>
+            <div class="user-section">
+                <h2>Usuario: <%= user.username %></h2>
+                
+                <h3>Personajes:</h3>
+                <% if (user.characters && user.characters.length > 0) { %>
+                    <ul>
+                    <% user.characters.forEach(character => { %>
+                        <li>
+                            <strong><%= character.name %></strong>
+                            <ul>
+                                <li>Nivel: <%= character.level %></li>
+                                <li>Clase: <%= character.class %></li>
+                            </ul>
+                            <form action="/characters/<%= character._id %>/edit" method="GET" style="display:inline;">
+                                <button type="submit" class="btn btn-warning">Editar</button>
+                            </form>
+                            <form action="/characters/<%= character._id %>/delete" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </li>
+                    <% }) %>
+                    </ul>
+                <% } else { %>
+                    <p>Este usuario no tiene personajes.</p>
+                <% } %>
+            </div>
+            <hr>
+            <form action="/users/<%= user._id %>/delete" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger">Eliminar Usuario</button>
+            </form>
+        <% }) %>
+    <% } else { %>
+        <p>No hay usuarios registrados en el sistema.</p>
+    <% } %>
+<% } else { %>
+    <p>Error: No se han pasado datos de usuarios a la vista.</p>
+<% } %>

@@ -79,22 +79,47 @@
 <body>
     <div class="container mt-5">
         <h1>Character List</h1>
+
+        <!-- Online Users Section -->
+        <h2 class="text-warning">Online Users</h2>
         <div class="row">
-            <% characters.forEach(character => { %>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3><%= character.name %></h3>
-                            <p>Level: <%= character.characterLevel %></p>
-                            <p>HP: <%= character.Hp %></p>
-                            <p>Damage: <%= character.Damage %></p>
-                            <p>Stamina: <%= character.Stamina %></p>
-                            <a href="/characters/<%= character.id %>/edit" class="btn btn-primary">Edit</a>
-                        </div>
+            <% onlineUsers.forEach(user => { %>
+                <div class="col-md-6">
+                    <h3><%= user.username %></h3>
+                    <div class="list-group">
+                        <% user.characters.forEach(character => { %>
+                            <div class="list-group-item">
+                                <strong>Name:</strong> <%= character.name %> | 
+                                <strong>Level:</strong> <%= character.level %> |
+                                <strong>HP:</strong> <%= character.hp %> |
+                                <a href="/characters/<%= character._id %>/edit" class="btn btn-primary btn-sm">Edit</a>
+                            </div>
+                        <% }); %>
                     </div>
                 </div>
             <% }); %>
         </div>
+
+        <!-- Offline Users Section -->
+        <h2 class="text-warning mt-4">Offline Users</h2>
+        <div class="row">
+            <% offlineUsers.forEach(user => { %>
+                <div class="col-md-6">
+                    <h3><%= user.username %></h3>
+                    <div class="list-group">
+                        <% user.characters.forEach(character => { %>
+                            <div class="list-group-item">
+                                <strong>Name:</strong> <%= character.name %> | 
+                                <strong>Level:</strong> <%= character.level %> |
+                                <strong>HP:</strong> <%= character.hp %> |
+                                <a href="/characters/<%= character._id %>/edit" class="btn btn-primary btn-sm">Edit</a>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
         <div class="text-center mt-4">
             <a href="/characters/create" class="btn btn-primary">Create New Character</a>
         </div>
